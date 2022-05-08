@@ -1,1 +1,3 @@
 @openzeppelin/=lib/openzeppelin-contracts/
+@hardhat/=lib/hardhat/
+ds-test/=lib/ds-test/src/

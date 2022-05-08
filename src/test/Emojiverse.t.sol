@@ -9,4 +9,6 @@ contract EmojiverseTest is DSTest {
     function testExample() public {
         assertTrue(true);
     }
+
+    
 }
