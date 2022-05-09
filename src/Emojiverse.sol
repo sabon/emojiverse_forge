@@ -20,6 +20,7 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import { Base64 } from "./libraries/Base64.sol";
 
 contract Emojiverse is ERC721, Ownable {
   using Counters for Counters.Counter;
@@ -160,6 +161,16 @@ contract Emojiverse is ERC721, Ownable {
       });
   }
 
+  // Mint a new Emojiboard
+  function mintEmojiverseNFT (string[] memory emojis, string[] memory messages, uint256 tokenId) public payable {
+    require(emojis.length > 0 && messages.length > 0 && emojis.length == messages.length);
+    require(msg.value >= mintPrice, "Wrong amount of ETH sent.");
+
+    // Mint token
+    _mint(msg.sender, tokenId);
+
+  }
+
   function createSvgSquareCode(SvgSquare memory svgSquare) public pure returns (bytes memory) {
     // return string(abi.encodePacked(SvgSquareCodePartOne(svgSquare), SvgSquareCodePartTwo(svgSquare)));
     return abi.encodePacked(SvgSquareCodePartOne(svgSquare), SvgSquareCodePartTwo(svgSquare));
@@ -268,7 +279,7 @@ contract Emojiverse is ERC721, Ownable {
   }
 
   // Generate token SVG based on the emojis and messages
-  function generateTokenSVG(string[] memory emojis, string[] memory messages, uint tokenId) private view returns (string memory innerSVG) {
+  function generateTokenSVG(string[] memory emojis, string[] memory messages, uint tokenId) private view returns (string memory) {
   
     // If one square, return the svg for just that one square
     if (emojis.length == 1) {
@@ -312,6 +323,27 @@ contract Emojiverse is ERC721, Ownable {
     }
   }
 
+  // Generate token URI
+  function tokenURI(uint tokenId, string[] memory messages, string[] memory emojis) public view returns (string memory) {
+    
+    return
+      string(
+        abi.encodePacked(
+          "data:application/json;base64,",
+          Base64.encode(
+            bytes(
+              abi.encodePacked(
+                '{"name": "Emojiboard #',
+                uint2str(tokenId),
+                '", "description": "Emojiverse is a fully on-chain, emoji-based NFT", "attributes": "", "image":"data:image/svg+xml;base64,',
+                Base64.encode(bytes(generateTokenSVG(emojis, messages, tokenId))),
+                '"}'
+              )
+            )
+          )
+        )
+      );
+  }
 
   // From: https://stackoverflow.com/a/65707309/11969592
   function uint2str(uint256 _i) internal pure returns (string memory _uintAsString) {
